@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Детали нарушения</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .violation-image {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .info-card {
+            border-left: 5px solid #0d6efd;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">
+                Нарушение #<span th:text="${report.cameraReportId}"></span>
+                <a href="/reports" class="btn btn-light btn-sm float-end">Назад к списку</a>
+            </h2>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="text-center mb-3">
+                        <img th:src="@{/{id}/image(id=${report.cameraReportId})}"
+                             class="violation-image img-fluid"
+                             alt="Фото нарушения">
+                        <div class="mt-2 text-muted small" th:text="${report.imageFileName}"></div>
+                    </div>
+
+                    <div class="card info-card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="bi bi-geo-alt"></i> Место нарушения</h5>
+                            <p class="card-text" th:text="${report.location}"></p>
+                            <p class="card-text">
+                                <span th:text="${report.direction}"></span>,
+                                <span th:text="${report.lane}"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="bi bi-car-front-fill"></i> Информация о ТС</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p><strong>Госномер:</strong></p>
+                                    <p><strong>Камера:</strong></p>
+                                    <p><strong>Дата/время:</strong></p>
+                                </div>
+                                <div class="col-6">
+                                    <p th:text="${report.plateNumber}"></p>
+                                    <p th:text="${report.camera.modelName}"></p>
+                                    <p th:text="${#temporals.format(report.timestamp, 'dd.MM.yyyy HH:mm:ss')}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="bi bi-speedometer2"></i> Параметры нарушения</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <p><strong>Тип нарушения:</strong></p>
+                                    <p><strong>Скорость:</strong></p>
+                                    <p><strong>Разрешено:</strong></p>
+                                    <p><strong>Превышение:</strong></p>
+                                </div>
+                                <div class="col-6">
+                                    <p th:text="${#strings.capitalizeWords(#strings.replace(report.violationType.name(), '_', ' '))}"></p>
+                                    <p th:text="${report.detectedSpeed} + ' км/ч'"></p>
+                                    <p th:text="${report.speedLimit} + ' км/ч'"></p>
+                                    <p th:text="${report.detectedSpeed - report.speedLimit} + ' км/ч'"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

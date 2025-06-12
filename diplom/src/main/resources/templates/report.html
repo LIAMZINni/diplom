@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Детали нарушения</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    /* Основные стили для интерфейса проверки */
+.violation-image-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+    margin-bottom: 1rem;
+}
+
+.plate-highlight {
+    position: absolute;
+    border: 2px dashed rgba(220, 53, 69, 0.7);
+    background-color: rgba(220, 53, 69, 0.2);
+    border-radius: 4px;
+    display: none;
+}
+
+.plate-number {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.color-badge {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+    margin-right: 5px;
+    vertical-align: middle;
+    border: 1px solid #dee2e6;
+}
+
+/* Анимации для важных элементов */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+.alert-wanted {
+    animation: pulse 2s infinite;
+    border-left: 5px solid #dc3545;
+}
+
+/* Адаптивные стили */
+@media (max-width: 992px) {
+    .violation-image {
+        max-height: 300px;
+    }
+
+    .decision-panel {
+        position: static;
+        margin-top: 20px;
+    }
+}
+
+/* Стили для таблиц */
+.table-sm th, .table-sm td {
+    padding: 0.3rem;
+}
+
+.table-borderless tbody tr td {
+    border: none;
+}
+  </style>
+</head>
+<body>
+<div class="container-fluid mt-4">
+  <!-- Навигационная панель -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark  ">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <img src="/static/images/гбдд.jpg" alt="ГИБДД" height="40">
+        <span class="ms-2">Система учета нарушений</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link " href="#"><i class="bi bi-house-door"></i> Главная</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/reports"><i class="bi bi-camera"></i> Нарушения</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/analytics"><i class="bi bi-graph-up"></i> Аналитика</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/list"><i class="bi bi-info-circle"></i> Список нарушений </a>
+          </li>
+          <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center">
+              <span class="text-light me-3"><i class="bi bi-person-circle"></i> Инспектор Иванов А.П.</span>
+              <!--                <span class="text-light me-3">-->
+              <!--                    <i class="bi bi-person-circle"></i>-->
+              <!--                    <span th:text="${#authentication.principal.fullName}"></span>-->
+              <!--                </span>-->
+              <a href="/logout" class="btn btn-sm btn-outline-light">
+                <i class="bi bi-box-arrow-right"></i> Выйти
+              </a>
+            </div>
+          </div>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Основной контент -->
+  <div class="row">
+    <div class="col-lg-8">
+      <!-- Карточка с изображением нарушения -->
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between">
+          <h5 class="mb-0">
+            <i class="bi bi-image"></i> Фотоматериалы нарушения
+          </h5>
+          <div>
+            <button class="btn btn-sm btn-light" id="zoomIn">
+              <i class="bi bi-zoom-in"></i>
+            </button>
+            <button class="btn btn-sm btn-light" id="zoomOut">
+              <i class="bi bi-zoom-out"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body text-center">
+          <div class="violation-image-container">
+            <img th:src="@{/{id}/image(id=${report.cameraReportId})}">
+
+<!--            <img src="viol.jpg" class="violation-image img-fluid"-->
+<!--                 id="violationImage"-->
+<!--                 alt="Фото нарушения">-->
+
+
+<!--            <div class="plate-highlight"-->
+<!--                 th:style="${vehicleInfo != null ? 'display: block; top: ' + vehicleInfo.platePositionY + 'px; left: ' + vehicleInfo.platePositionX + 'px; width: ' + vehicleInfo.plateWidth + 'px; height: ' + vehicleInfo.plateHeight + 'px;' : 'display: none;'}">-->
+<!--              <span class="plate-number" th:text="${report.plateNumber}"></span>-->
+<!--            </div>-->
+          </div>
+          <div class="mt-2">
+<!--            <button class="btn btn-sm btn-outline-secondary" id="togglePlateHighlight">-->
+<!--              <i class="bi bi-car-front"></i> Подсветить номер-->
+<!--            </button>-->
+<!--            <button class="btn btn-sm btn-outline-secondary" id="showOriginal">-->
+<!--              <i class="bi bi-image-alt"></i> Оригинальное фото-->
+<!--            </button>-->
+          </div>
+        </div>
+      </div>
+
+      <!-- Дополнительные медиаматериалы -->
+      <div class="card mb-4 shadow-sm" >
+        <div class="card decision-panel">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Принятие решения</h5>
+          </div>
+          <div class="card-body">
+            <form th:action="@{/verify/{id}(id=${report.cameraReportId})}" method="post">
+              <input type="hidden" name="_csrf" th:value="${_csrf?.token}">
+
+              <div class="mb-3">
+                <label class="form-label">Решение</label>
+                <select class="form-select" name="decision" required>
+                  <option value="">-- Выберите решение --</option>
+                  <option value="CONFIRM"
+                          th:selected="${report.status == 'VERIFIED'}">
+                    Подтвердить нарушение
+                  </option>
+                  <option value="REJECT"
+                          th:selected="${report.status == 'REJECTED'}">
+                    Отклонить нарушение
+                  </option>
+                  <option value="ESCALATE"
+                          th:selected="${report.status == 'UNDER_REVIEW'}">
+                    Требуется дополнительная проверка
+                  </option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Комментарий</label>
+                <textarea class="form-control" name="comment" rows="3"
+                          placeholder="Укажите причину принятого решения"
+                          th:text="${violation?.comment}"></textarea>
+              </div>
+
+              <div th:if="${vehicleInfo != null and vehicleInfo.wanted}"
+                   class="alert alert-warning mb-3">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                ТС в розыске! Рекомендуется создать ориентировку.
+                <div class="mt-2">
+                  <a href="#" class="btn btn-sm btn-outline-danger"
+                     data-bs-toggle="modal" data-bs-target="#createAlertModal">
+                    <i class="bi bi-megaphone"></i> Создать ориентировку
+                  </a>
+                </div>
+              </div>
+
+              <div class="d-grid gap-2">
+                <button type="submit" name="action" value="confirm"
+                        class="btn btn-success" th:disabled="${report.status == 'VERIFIED'}">
+                  <i class="bi bi-check-circle"></i> Подтвердить
+                </button>
+                <button type="submit" name="action" value="reject"
+                        class="btn btn-danger" th:disabled="${report.status == 'REJECTED'}">
+                  <i class="bi bi-x-circle"></i> Отклонить
+                </button>
+                <button type="submit" name="action" value="escalate"
+                        class="btn btn-warning" th:disabled="${report.status == 'UNDER_REVIEW'}">
+                  <i class="bi bi-flag"></i> На проверку
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Правая панель с информацией -->
+    <div class="col-lg-4">
+
+
+      <!-- Карточка быстрых действий -->
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-lightning-charge"></i> Быстрые действия
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#driverInfoModal">
+              <i class="bi bi-person-lines-fill"></i> Проверить водителя
+            </button>
+            <button class="btn btn-info" id="checkSimilarViolations">
+              <i class="bi bi-search"></i> Поиск похожих нарушений
+            </button>
+            <button class="btn btn-warning" id="requestAdditionalInfo" data-bs-toggle="modal" data-bs-target="#createAlertModal">
+              <i class="bi bi-exclamation-triangle-fill"  ></i> Создание ориентировки 
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Блок с предупреждением о розыске -->
+      <div class="col-md">
+        <div th:if="${vehicleInfo.wanted}"
+             class="alert alert-danger alert-wanted mb-3">
+          <h4 class="alert-heading">
+            <i class="bi bi-exclamation-triangle-fill"></i> Транспортное средство в розыске!
+          </h4>
+          <p th:text="${vehicleInfo.wantedInfo.reason}"></p>
+          <button class="btn btn-sm btn-outline-danger"
+                  data-bs-toggle="modal"
+                  data-bs-target="#wantedVehicleModal">
+            Подробнее
+          </button>
+        </div>
+      </div>
+
+      <!-- Карточка информации о нарушении -->
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-info-circle"></i> Информация о нарушении
+          </h5>
+        </div>
+        <div class="card-body">
+          <table class="table table-sm table-borderless">
+            <tbody>
+            <tr>
+              <th width="40%">ID нарушения:</th>
+              <td th:text="${report.cameraReportId}"></td>
+            </tr>
+            <tr>
+              <th>Камера:</th>
+              <td>
+                <span th:text="${report.camera.modelName}"></span>
+                <button class="btn btn-sm btn-link p-0 ms-2" data-bs-toggle="tooltip"
+                        title="Показать на карте" id="showCameraOnMap">
+                  <i class="bi bi-geo-alt"></i>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <th>Дата/время:</th>
+              <td th:text="${#temporals.format(report.timestamp, 'dd.MM.yyyy HH:mm:ss')}"></td>
+            </tr>
+            <tr>
+              <th>Местоположение:</th>
+              <td>
+                <span th:text="${report.location}"></span>
+                <div class="text-muted small" th:text="${report.direction} + ', ' + ${report.lane}"></div>
+              </td>
+            </tr>
+            <tr>
+              <th>Тип нарушения:</th>
+              <td>
+                                    <span class="badge" th:classappend="${report.violationType == 'SPEEDING' ? 'bg-danger' : 'bg-secondary'}"
+                                          th:text="${report.violationType.displayName}"></span>
+              </td>
+            </tr>
+            <tr th:if="${report.violationType.name() == 'SPEEDING'}">
+              <th>Скорость:</th>
+              <td>
+                <span th:text="${report.detectedSpeed} + ' км/ч'"></span>
+                <small class="text-muted">(разрешено: <span th:text="${report.speedLimit} + ' км/ч'"></span>)</small>
+                <div class="progress mt-1" style="height: 5px;">
+                  <div class="progress-bar bg-danger" role="progressbar"
+                       th:style="'width: ' + ${(report.detectedSpeed / 200) * 100} + '%;'"
+                       aria-valuenow="${report.detectedSpeed}" aria-valuemin="0" aria-valuemax="200"></div>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Карточка информации о ТС -->
+      <div class="card mb-4 shadow-sm" th:classappend="${vehicleInfo.wanted ? 'border-danger' : ''}">
+        <div class="card-header" th:classappend="${vehicleInfo.wanted ? 'bg-danger text-white' : 'bg-primary text-white'}">
+          <h5 class="mb-0 d-flex justify-content-between align-items-center">
+            <span>
+                <i class="bi bi-car-front"></i> Информация о ТС
+                <span th:if="${vehicleInfo.wanted}" class="badge bg-white text-danger ms-2">
+                    <i class="bi bi-exclamation-triangle-fill"></i> В розыске
+                </span>
+            </span>
+            <button class="btn btn-sm btn-light" th:if="${vehicleInfo.wanted}"
+                    data-bs-toggle="modal" data-bs-target="#wantedVehicleModal"
+                    th:attr="title=${'Подробнее о розыске'}">
+              <i class="bi bi-info-circle"></i>
+            </button>
+          </h5>
+        </div>
+
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-5 col-12 text-center mb-3 mb-md-0">
+              <div class="text-center mb-3">
+                <i class="bi bi-car-front" style="font-size: 3rem;"></i>
+                <div class="mt-2">
+                  <span class="badge bg-secondary" th:text="${vehicle.type.displayName}"></span>
+                </div>
+              </div>
+            </div>
+            <div class="col-7">
+              <table class="table table-sm table-borderless">
+                <tbody>
+                <tr>
+                  <th>Госномер:</th>
+                  <td th:text="${vehicle.plateNumber}"></td>
+                </tr>
+                <tr>
+                  <th>Марка/модель:</th>
+                  <td th:text="${vehicle.make}+ '  ,'+${vehicle.model}"></td>
+                </tr>
+                <tr>
+                  <th>Год выпуска:</th>
+                  <td th:text="${vehicle.year}"></td>
+                </tr>
+                <tr>
+                  <th>Цвет:</th>
+                  <td>
+<!--                                            <span class="color-badge"-->
+<!--                                                  th:style="'background-color: ' + ${vehicle.colorHex} + ';'"></span>-->
+                    <span th:text="${vehicle.color}"></span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>VIN:</th>
+                  <td>
+                    <span th:text="${vehicle.vin}"></span>
+                    <button class="btn btn-sm btn-link p-0 ms-1" data-bs-toggle="tooltip"
+                            title="Проверить VIN" id="checkVin">
+                      <i class="bi bi-search"></i>
+                    </button>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Модальное окно информации о водителе -->
+<div class="modal fade" id="driverInfoModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Информация о водителе</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+<!--          <div class="col-md-4 text-center">-->
+<!--            <img id="driverPhoto" src="/static/images/default-driver.jpg"-->
+<!--                 class="img-thumbnail mb-3" alt="Фото водителя">-->
+<!--            <div class="mb-3">-->
+<!--              <span class="badge bg-success" id="driverLicenseStatus">Действителен</span>-->
+<!--            </div>-->
+<!--          </div>-->
+          <div class="col-md-8">
+            <table class="table table-sm">
+              <tbody>
+              <tr>
+                <th width="30%">ФИО:</th>
+                <td id="driverName">Иванов Иван Иванович</td>
+              </tr>
+              <tr>
+                <th>Водительское удостоверение:</th>
+                <td id="driverLicense">78АВ123456</td>
+              </tr>
+              <tr>
+                <th>Дата рождения:</th>
+                <td id="driverBirthDate">15.03.1985</td>
+              </tr>
+              <tr>
+                <th>Адрес:</th>
+                <td id="driverAddress">г. Москва, ул. Примерная, д. 123</td>
+              </tr>
+              <tr>
+                <th>Телефон:</th>
+                <td id="driverPhone">+7 (123) 456-78-90</td>
+              </tr>
+              <tr>
+                <th>Статус:</th>
+                <td>
+                  <span id="driverStatus" class="badge bg-success">Активен</span>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+
+            <h6 class="mt-4">История нарушений</h6>
+            <div class="table-responsive">
+              <table class="table table-sm table-striped">
+                <thead>
+                <tr>
+                  <th>Дата</th>
+                  <th>Тип</th>
+                  <th>Штраф</th>
+                  <th>Статус</th>
+                </tr>
+                </thead>
+                <tbody id="driverViolations">
+                <!-- Данные будут загружены через AJAX -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+        <button type="button" class="btn btn-primary" id="printDriverInfo">
+          <i class="bi bi-printer"></i> Печать
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно с деталями розыска -->
+<div class="modal fade" id="wantedVehicleModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Транспортное средство в розыске</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <!-- Колонка с данными ТС -->
+          <div class="col-md-6">
+            <p><strong>Госномер:</strong>
+              <span th:text="${vehicleInfo.vehicle.plateNumber} ?: 'Не указан'"></span></p>
+            <p><strong>Марка/модель:</strong>
+              <span th:text="${vehicleInfo.vehicle != null ?
+                                      (vehicleInfo.vehicle.make + ' ' + vehicleInfo.vehicle.model) :
+                                      'Нет данных'}"></span></p>
+            <p><strong>Цвет:</strong>
+              <span th:text="${vehicleInfo.vehicle?.color} ?: 'Не указан'"></span></p>
+            <p><strong>VIN:</strong>
+              <span th:text="${vehicleInfo.vehicle?.vin} ?: 'Не указан'"></span></p>
+          </div>
+
+          <!-- Колонка с данными розыска -->
+          <div class="col-md-6">
+            <p><strong>Причина розыска:</strong>
+              <span th:text="${vehicleInfo.wantedInfo?.reason} ?: 'Не указана'"></span></p>
+            <p><strong>Дата объявления:</strong>
+              <span th:text="${#temporals.format(vehicleInfo.wantedInfo?.reportDate, 'dd.MM.yyyy')}"></span></p>
+            <p><strong>Орган:</strong>
+              <span th:text="${vehicleInfo.wantedInfo?.reportingAuthority} ?: 'Не указан'"></span></p>
+            <p><strong>Контакты:</strong>
+              <span th:text="${vehicleInfo.wantedInfo?.contactInfo} ?: 'Не указаны'"></span></p>
+          </div>
+        </div>
+
+        <!-- Дополнительная информация -->
+        <div class="mt-3" th:if="${vehicleInfo.wantedInfo?.additionalDetails}">
+          <h6>Дополнительная информация:</h6>
+          <p class="text-muted" th:text="${vehicleInfo.wantedInfo?.additionalDetails}"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+        <button type="button" class="btn btn-primary" id="createAlertBtn" data-bs-toggle="modal" data-bs-target="#createAlertModal"
+                th:disabled="${vehicleInfo?.vehicle == null}">
+          <i class="bi bi-megaphone"></i> Создать ориентировку
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно создания ориентировки -->
+<div class="modal fade" id="createAlertModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title">Создание ориентировки</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="alertForm">
+          <input type="hidden" id="plateNumber" th:value="${report.plateNumber}">
+          <div class="mb-3">
+            <label class="form-label">Тип ориентировки</label>
+            <select class="form-select" name="alertType" required>
+              <option value="STOLEN">Угон транспортного средства</option>
+              <option value="WANTED">Розыск водителя</option>
+              <option value="WRONG_PLATE">Несоответствие номера</option>
+              <option value="DANGEROUS">Опасный водитель</option>
+              <option value="OTHER">Другое</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Приоритет</label>
+            <select class="form-select" name="priority" required>
+              <option value="LOW">Низкий</option>
+              <option value="MEDIUM" selected>Средний</option>
+              <option value="HIGH">Высокий</option>
+              <option value="URGENT">Срочный</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Описание</label>
+            <textarea class="form-control" name="description" rows="3" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Действия при обнаружении</label>
+            <textarea class="form-control" name="actions" rows="2" required></textarea>
+          </div>
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" name="notifyPatrol" checked>
+            <label class="form-check-label">Уведомить ближайшие патрули</label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="button" class="btn btn-warning" id="submitAlert" >
+          <i class="bi bi-send"></i> Отправить ориентировку
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const submitBtn = document.getElementById('submitAlert');
+
+
+    submitBtn.addEventListener('click', async function() {
+        try {
+            // Получаем номер ТС (выберите один из вариантов)
+            const plateNumber = document.getElementById('plateNumber').value;
+
+
+
+            if (!plateNumber) {
+                throw new Error("Не удалось определить номер ТС");
+            }
+
+            const alertData = {
+                plateNumber: plateNumber,
+                alertType: document.querySelector('select[name="alertType"]').value,
+                description: document.querySelector('textarea[name="description"]').value,
+                priority: document.querySelector('select[name="priority"]').value,
+                actions: document.querySelector('textarea[name="actions"]').value,
+                notifyPatrol: document.querySelector('input[name="notifyPatrol"]').checked
+            };
+
+            console.log("Отправляемые данные:", alertData);
+
+            const response = await fetch('/alerts/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(alertData)
+            });
+
+            if (!response.ok) {
+                throw new Error(await response.text());
+            }
+
+            const result = await response.json();
+            console.log("Результат:", result);
+
+            // Закрываем модальное окно
+            bootstrap.Modal.getInstance(document.getElementById('createAlertModal')).hide();
+
+            // Показываем уведомление
+            alert('Ориентировка создана для номера: ' + plateNumber);
+
+        } catch (error) {
+            console.error("Ошибка:", error);
+            alert('Ошибка: ' + error.message);
+        }
+    });
+});
+  document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация тултипов
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Подсветка номера
+    const togglePlateHighlight = document.getElementById('togglePlateHighlight');
+    const plateHighlight = document.querySelector('.plate-highlight');
+    togglePlateHighlight.addEventListener('click', function() {
+        plateHighlight.style.display = plateHighlight.style.display === 'none' ? 'block' : 'none';
+        this.innerHTML = plateHighlight.style.display === 'none'
+            ? '<i class="bi bi-car-front"></i> Подсветить номер'
+            : '<i class="bi bi-eye-slash"></i> Скрыть подсветку';
+    });
+
+    // Масштабирование изображения
+    let currentScale = 1;
+    const violationImage = document.getElementById('violationImage');
+    document.getElementById('zoomIn').addEventListener('click', function() {
+        currentScale += 0.1;
+        violationImage.style.transform = `scale(${currentScale})`;
+    });
+    document.getElementById('zoomOut').addEventListener('click', function() {
+        if (currentScale > 0.5) {
+            currentScale -= 0.1;
+            violationImage.style.transform = `scale(${currentScale})`;
+        }
+    });
+
+    // Проверка водителя
+    document.getElementById('checkDriverInfo').addEventListener('click', function() {
+        const plateNumber = document.querySelector('[th\\:text="${report.plateNumber}"]').textContent;
+
+        fetch(`/api/driver-info?plate=${plateNumber}`)
+            .then(response => response.json())
+            .then(data => {
+                // Заполнение модального окна данными
+                document.getElementById('driverName').textContent = data.fullName;
+                document.getElementById('driverLicense').textContent = data.licenseNumber;
+                document.getElementById('driverLicenseStatus').textContent = data.licenseStatus;
+                document.getElementById('driverPhoto').src = data.photoUrl;
+
+                // Показать модальное окно
+                const modal = new bootstrap.Modal(document.getElementById('driverInfoModal'));
+                modal.show();
+            });
+    });
+
+    // Интеграция с картами
+    document.getElementById('showCameraOnMap').addEventListener('click', function() {
+        const location = {
+            lat: parseFloat(document.querySelector('[data-lat]').dataset.lat),
+            lng: parseFloat(document.querySelector('[data-lng]').dataset.lng)
+        };
+
+        // Здесь будет интеграция с API карт (Яндекс/Google)
+        console.log('Открытие карты с координатами:', location);
+        alert(`Карта будет открыта для координат: ${location.lat}, ${location.lng}`);
+    });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход в систему | ГИБДД</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --accent-color: #e74c3c;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .login-container {
+      max-width: 420px;
+      width: 100%;
+      margin: 0 auto;
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    .login-card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .login-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .login-header {
+      background: var(--primary-color);
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .login-header h2 {
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .login-body {
+      padding: 2rem;
+      background: white;
+    }
+
+    .form-control {
+      border-radius: 8px;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      transition: all 0.3s;
+    }
+
+    .form-control:focus {
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+    }
+
+    .btn-login {
+      background: var(--secondary-color);
+      border: none;
+      padding: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: all 0.3s;
+    }
+
+    .btn-login:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+    }
+
+    .logo {
+      width: 80px;
+      margin-bottom: 1rem;
+    }
+
+    .input-group-text {
+      background: #f8f9fa;
+      border-right: none;
+    }
+
+    .form-floating > .form-control:not(:placeholder-shown) ~ label {
+      color: var(--secondary-color);
+    }
+
+    .footer-links {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .footer-links a {
+      color: var(--primary-color);
+      text-decoration: none;
+      margin: 0 10px;
+      transition: color 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-color);
+    }
+
+    .error-message {
+      animation: shake 0.5s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
+    }
+
+    .password-toggle {
+      cursor: pointer;
+      color: #7f8c8d;
+      transition: color 0.3s;
+    }
+
+    .password-toggle:hover {
+      color: var(--secondary-color);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+<!--        <img src="/images/logo-gibdd-white.png" alt="ГИБДД" class="logo">-->
+        <h2>Система проверки нарушений</h2>
+      </div>
+
+      <div class="login-body">
+        <form th:action="@{/login}" method="post" id="loginForm">
+          <!-- Сообщение об ошибке -->
+          <div th:if="${param.error}" class="alert alert-danger error-message mb-4">
+            <i class="bi bi-exclamation-triangle-fill"></i> Неверные учетные данные
+          </div>
+
+          <!-- Сообщение о выходе -->
+          <div th:if="${param.logout}" class="alert alert-success mb-4">
+            <i class="bi bi-check-circle-fill"></i> Вы успешно вышли из системы
+          </div>
+
+          <!-- Поле ввода логина -->
+          <div class="mb-3">
+            <label for="username" class="form-label">Имя пользователя</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-person"></i></span>
+              <input type="text" class="form-control" id="username" name="username"
+                     placeholder="Введите имя пользователя" required>
+            </div>
+          </div>
+
+          <!-- Поле ввода пароля -->
+          <div class="mb-4">
+            <label for="password" class="form-label">Пароль</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock"></i></span>
+              <input type="password" class="form-control" id="password" name="password"
+                     placeholder="Введите пароль" required>
+              <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Запомнить меня -->
+          <div class="form-check mb-4">
+            <input class="form-check-input" type="checkbox" id="remember-me" name="remember-me">
+            <label class="form-check-label" for="remember-me">Запомнить меня</label>
+          </div>
+
+          <!-- Кнопка входа -->
+          <button type="submit" class="btn btn-primary w-100 btn-login mb-3">
+            <i class="bi bi-box-arrow-in-right"></i> Войти
+          </button>
+
+
+
+
+
+    <!-- Футер -->
+    <div class="text-center mt-4 text-muted small">
+      <p>© 2025 ГИБДД МВД России. Версия 2.2.8</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Переключение видимости пароля
+  document.getElementById('togglePassword').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const icon = this.querySelector('i');
+
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      icon.classList.remove('bi-eye-fill');
+      icon.classList.add('bi-eye-slash-fill');
+    } else {
+      passwordInput.type = 'password';
+      icon.classList.remove('bi-eye-slash-fill');
+      icon.classList.add('bi-eye-fill');
+    }
+  });
+
+  // Анимация при ошибке ввода
+  const form = document.getElementById('loginForm');
+  form.addEventListener('submit', function(e) {
+    const inputs = form.querySelectorAll('input[required]');
+    let isValid = true;
+
+    inputs.forEach(input => {
+      if (!input.value) {
+        input.classList.add('is-invalid');
+        isValid = false;
+      } else {
+        input.classList.remove('is-invalid');
+      }
+    });
+
+    if (!isValid) {
+      e.preventDefault();
+      form.classList.add('error-message');
+      setTimeout(() => form.classList.remove('error-message'), 500);
+    }
+  });
+</script>
+</body>
+</html>
