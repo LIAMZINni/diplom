@@ -105,7 +105,10 @@
             <a class="nav-link" href="/analytics"><i class="bi bi-graph-up"></i> Аналитика</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/list"><i class="bi bi-info-circle"></i> Список нарушений </a>
+            <a class="nav-link" href="/list"><i class="bi bi-info-circle"></i> Отчеты о нарушениях </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/violations"><i class="bi bi-speedometer"></i> Штрафы </a>
           </li>
           <div class="d-flex align-items-center">
             <div class="d-flex align-items-center">
@@ -261,21 +264,21 @@
         </div>
       </div>
 
-      <!-- Блок с предупреждением о розыске -->
-      <div class="col-md">
-        <div th:if="${vehicleInfo.wanted}"
-             class="alert alert-danger alert-wanted mb-3">
-          <h4 class="alert-heading">
-            <i class="bi bi-exclamation-triangle-fill"></i> Транспортное средство в розыске!
-          </h4>
-          <p th:text="${vehicleInfo.wantedInfo.reason}"></p>
-          <button class="btn btn-sm btn-outline-danger"
-                  data-bs-toggle="modal"
-                  data-bs-target="#wantedVehicleModal">
-            Подробнее
-          </button>
-        </div>
-      </div>
+<!--      &lt;!&ndash; Блок с предупреждением о розыске &ndash;&gt;-->
+<!--      <div class="col-md">-->
+<!--        <div th:if="${vehicleInfo.wanted}"-->
+<!--             class="alert alert-danger alert-wanted mb-3">-->
+<!--          <h4 class="alert-heading">-->
+<!--            <i class="bi bi-exclamation-triangle-fill"></i> Транспортное средство в розыске!-->
+<!--          </h4>-->
+<!--          <p th:text="${vehicleInfo.wantedInfo.reason}"></p>-->
+<!--          <button class="btn btn-sm btn-outline-danger"-->
+<!--                  data-bs-toggle="modal"-->
+<!--                  data-bs-target="#wantedVehicleModal">-->
+<!--            Подробнее-->
+<!--          </button>-->
+<!--        </div>-->
+<!--      </div>-->
 
       <!-- Карточка информации о нарушении -->
       <div class="card mb-4 shadow-sm">

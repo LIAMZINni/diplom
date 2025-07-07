@@ -53,7 +53,7 @@
         <div class="card-header">Фильтры</div>
         <div class="card-body">
             <form th:action="@{/list}" method="get" class="row g-3">
-                 Фильтр по камере
+
                 <div class="col-md-3">
                     <label class="form-label">ID камеры</label>
                     <input type="number" name="cameraId" class="form-control"
@@ -166,11 +166,13 @@
                     <!-- Скорость -->
                     <td>
                         <span th:text="${report.detectedSpeed} + '/' + ${report.speedLimit}"></span>
-                        <span th:classappend="${report.detectedSpeed > report.speedLimit * 1.2} ?
-                                      'badge-speed-excess' : 'badge-speed-warning'"
+                        <span th:classappend="${report.detectedSpeed != null and report.speedLimit != null and report.detectedSpeed > report.speedLimit * 1.2} ?
+                    'badge-speed-excess' : 'badge-speed-warning'"
                               class="badge ms-2">
-                                    +<span th:text="${report.detectedSpeed - report.speedLimit}"></span>
-                                </span>
+    <span th:if="${report.detectedSpeed != null and report.speedLimit != null}">
+        +<span th:text="${report.detectedSpeed - report.speedLimit}"></span>
+    </span>
+</span>
                     </td>
 
                     <!-- Статус -->
@@ -219,36 +221,36 @@
         </div>
 
         <!-- Пагинация -->
-        <div class="card-footer" th:if="${reports.totalPages > 1}">
-            <nav aria-label="Page navigation">
-                <ul class="pagination justify-content-center mb-0">
-                    <!-- Кнопка "Назад" -->
-                    <li class="page-item" th:classappend="${reports.first} ? 'disabled' : ''">
-                        <a class="page-link"
-                           th:href="@{${#request.getRequestURI()}(cameraId=${param.cameraId}, cameraModel=${param.cameraModel}, plateNumber=${param.plateNumber}, status=${param.status}, startDate=${param.startDate}, endDate=${param.endDate}, page=${reports.number - 1}, sort=${param.sort})}">
-                            <i class="bi bi-chevron-left"></i>
-                        </a>
-                    </li>
+<!--        <div class="card-footer" th:if="${reports.totalPages > 1}">-->
+<!--            <nav aria-label="Page navigation">-->
+<!--                <ul class="pagination justify-content-center mb-0">-->
+<!--                    &lt;!&ndash; Кнопка "Назад" &ndash;&gt;-->
+<!--                    <li class="page-item" th:classappend="${reports.first} ? 'disabled' : ''">-->
+<!--                        <a class="page-link"-->
+<!--                           th:href="@{${#httpServletRequest.getRequestURI()}(cameraId=${param.cameraId}, cameraModel=${param.cameraModel}, plateNumber=${param.plateNumber}, status=${param.status}, startDate=${param.startDate}, endDate=${param.endDate}, page=${reports.number - 1}, sort=${param.sort})}">-->
+<!--                            <i class="bi bi-chevron-left"></i>-->
+<!--                        </a>-->
+<!--                    </li>-->
 
-                    <!-- Номера страниц -->
-                    <li class="page-item" th:each="i : ${#numbers.sequence(0, reports.totalPages - 1)}"
-                        th:classappend="${i == reports.number} ? 'active' : ''">
-                        <a class="page-link"
-                           th:href="@{${#request.getRequestURI()}(cameraId=${param.cameraId}, cameraModel=${param.cameraModel}, plateNumber=${param.plateNumber}, status=${param.status}, startDate=${param.startDate}, endDate=${param.endDate}, page=${i}, sort=${param.sort})}"
-                           th:text="${i + 1}"></a>
-                    </li>
+<!--                    &lt;!&ndash; Номера страниц &ndash;&gt;-->
+<!--                    <li class="page-item" th:each="i : ${#numbers.sequence(0, reports.totalPages - 1)}"-->
+<!--                        th:classappend="${i == reports.number} ? 'active' : ''">-->
+<!--                        <a class="page-link"-->
+<!--                           th:href="@{${#request.getRequestURI()}(cameraId=${param.cameraId}, cameraModel=${param.cameraModel}, plateNumber=${param.plateNumber}, status=${param.status}, startDate=${param.startDate}, endDate=${param.endDate}, page=${i}, sort=${param.sort})}"-->
+<!--                           th:text="${i + 1}"></a>-->
+<!--                    </li>-->
 
-                    <!-- Кнопка "Вперед" -->
-                    <li class="page-item" th:classappend="${reports.last} ? 'disabled' : ''">
-                        <a class="page-link"
-                           th:href="@{${#request.getRequestURI()}(cameraId=${param.cameraId}, cameraModel=${param.cameraModel}, plateNumber=${param.plateNumber}, status=${param.status}, startDate=${param.startDate}, endDate=${param.endDate}, page=${reports.number + 1}, sort=${param.sort})}">
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </div>
+<!--                    &lt;!&ndash; Кнопка "Вперед" &ndash;&gt;-->
+<!--                    <li class="page-item" th:classappend="${reports.last} ? 'disabled' : ''">-->
+<!--                        <a class="page-link"-->
+<!--                           th:href="@{${#request.getRequestURI()}(cameraId=${param.cameraId}, cameraModel=${param.cameraModel}, plateNumber=${param.plateNumber}, status=${param.status}, startDate=${param.startDate}, endDate=${param.endDate}, page=${reports.number + 1}, sort=${param.sort})}">-->
+<!--                            <i class="bi bi-chevron-right"></i>-->
+<!--                        </a>-->
+<!--                    </li>-->
+<!--                </ul>-->
+<!--            </nav>-->
+<!--        </div>-->
+<!--    </div>-->
 </div>
 
 <!-- Bootstrap JS -->

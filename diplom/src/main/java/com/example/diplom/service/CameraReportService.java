@@ -45,7 +45,7 @@ public class CameraReportService {
         return reportRepository.countByStatus()
                 .stream()
                 .collect(Collectors.toMap(
-                        tuple -> ((CameraReportStatus) tuple[0]).name(),
+                        tuple -> ((CameraReportStatus) tuple[0]).description,
                         tuple -> (Long) tuple[1]
                 ));
     }

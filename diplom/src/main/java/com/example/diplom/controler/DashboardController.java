@@ -1,8 +1,7 @@
 package com.example.diplom.controler;
 
-import com.example.diplom.DTO.DashboardStats;
 import com.example.diplom.Vehicle.repository.WantedVehicleRepository;
-import com.example.diplom.repository.ViolationRepository;
+import com.example.diplom.Violations.ViolationRepository;
 import com.example.diplom.service.ViolationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

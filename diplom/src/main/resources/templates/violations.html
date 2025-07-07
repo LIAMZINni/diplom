@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление штрафами</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        .status-PENDING { background-color: #fff3cd; }
+        .status-PAID { background-color: #d1e7dd; }
+        .status-APPEALED { background-color: #cfe2ff; }
+        .status-REJECTED { background-color: #f8d7da; }
+        .sortable { cursor: pointer; }
+        /* Стили для официального документа */
+.official-document {
+  font-family: 'Times New Roman', serif;
+  line-height: 1.5;
+}
+
+.document-header {
+  border-bottom: 2px solid #000;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.document-section {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.signature-block {
+  margin-top: 50px;
+}
+
+.signature-line {
+  width: 200px;
+  border-top: 1px solid #000;
+  margin: 5px 0;
+}
+
+.stamp-placeholder {
+  margin-top: 30px;
+}
+
+.stamp-circle {
+  display: inline-block;
+  width: 100px;
+  height: 100px;
+  border: 2px solid red;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 100px;
+  font-weight: bold;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+  .official-document {
+    font-size: 14px;
+  }
+}
+    </style>
+</head>
+<body>
+<div class="container-fluid mt-4">
+    <h1 class="mb-4"><i class="bi bi-cash-stack"></i> Управление штрафами</h1>
+
+    <!-- Фильтры -->
+    <div class="card mb-4">
+        <div class="card-header">Фильтры</div>
+        <div class="card-body">
+            <form th:action="@{/violations}" method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Статус</label>
+                    <select name="status" class="form-select">
+                        <option value="">Все</option>
+                        <option th:each="s : ${statuses}"
+                                th:value="${s}"
+                                th:text="${s}"
+                                th:selected="${s == param.status}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Номер ТС</label>
+                    <input type="text" name="plateNumber" class="form-control"
+                           th:value="${param.plateNumber}" placeholder="A123BC123">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Дата от</label>
+                    <input type="date" name="startDate" class="form-control"
+                           th:value="${param.startDate}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Дата до</label>
+                    <input type="date" name="endDate" class="form-control"
+                           th:value="${param.endDate}">
+                </div>
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-funnel"></i> Применить
+                    </button>
+                    <a th:href="@{/violations}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-counterclockwise"></i> Сбросить
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Таблица штрафов -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>Найдено штрафов: <span th:text="${fines.totalElements}"></span></span>
+            <div th:if="${fines.totalPages > 1}" class="text-muted">
+                Страница <span th:text="${fines.number + 1}"></span> из <span th:text="${fines.totalPages}"></span>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th class="sortable" onclick="sortBy('violationTime')">
+                        Дата нарушения
+                        <i class="bi bi-arrow-down-up"></i>
+                    </th>
+                    <th>Транспортное средство</th>
+                    <th>Тип нарушения</th>
+                    <th>Статья</th>
+                    <th class="sortable" onclick="sortBy('fineAmount')">
+                        Сумма
+                        <i class="bi bi-arrow-down-up"></i>
+                    </th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="fine : ${fines}" th:classappend="'status-' + ${fine.status}">
+                    <td th:text="${#temporals.format(fine.violationTime, 'dd.MM.yyyy HH:mm')}"></td>
+                    <td>
+                        <div class="fw-bold" th:text="${fine.vehicle.plateNumber}"></div>
+                        <div class="small text-muted">
+                            <span th:text="${fine.vehicle.make} + ' ' + ${fine.vehicle.model}"></span>
+                            <span th:if="${fine.vehicle.color}"
+                                  th:text="', ' + ${fine.vehicle.color}"></span>
+                        </div>
+<!--                        <span th:if="${fine.vehicle.wanted}" class="badge bg-danger mt-1">-->
+<!--        <i class="bi bi-exclamation-triangle"></i> Розыск-->
+<!--    </span>-->
+                    </td>
+                    <td th:text="${fine.type.displayName}"></td>
+                    <td th:text="${fine.type.article}"></td>
+                    <td>
+                        <div th:if="${fine.fineAmount lt fine.type.baseAmount}">
+        <span class="text-decoration-line-through text-muted me-2"
+              th:text="${#numbers.formatDecimal(fine.type.baseAmount, 1, 2)} + ' ₽'"></span>
+                            <span class="text-success fw-bold"
+                                  th:text="${#numbers.formatDecimal(fine.fineAmount, 1, 2)} + ' ₽'"></span>
+                        </div>
+                        <div th:unless="${fine.fineAmount lt fine.type.baseAmount}"
+                             th:text="${#numbers.formatDecimal(fine.fineAmount, 1, 2)} + ' ₽'"></div>
+                    </td>
+                    <td>
+    <span class="badge d-flex align-items-center"
+          th:classappend="${fine.status == 'PENDING'} ? 'bg-warning' :
+                          (${fine.status == 'PAID'} ? 'bg-success' :
+                          (${fine.status == 'APPEALED'} ? 'bg-primary' :
+                          (${fine.status == 'REJECTED'} ? 'bg-danger' : 'bg-secondary')))">
+        <i class="me-1"
+           th:classappend="${fine.status == 'PENDING'} ? 'fas fa-clock' :
+                          (${fine.status == 'PAID'} ? 'fas fa-check-circle' :
+                          (${fine.status == 'APPEALED'} ? 'fas fa-gavel' :
+                          (${fine.status == 'REJECTED'} ? 'fas fa-times-circle' : 'fas fa-question-circle')))"></i>
+        <span th:text="${#strings.toUpperCase(#strings.substring(fine.status.description, 0, 1)) +
+                        #strings.toLowerCase(#strings.substring(fine.status.description, 1))}"></span>
+    </span>
+                    </td>
+                    <td>
+                        <a th:href="@{/fine/{id}(id=${fine.id})}"><button class="btn btn-sm btn-outline-primary"
+                                >
+                            <i class="bi bi-eye"></i> Просмотр
+                        </button></a>
+                        <a th:href="@{/{id}/pdf(id=${fine.id})}"
+                           class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-file-earmark-pdf"></i> PDF
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Пагинация -->
+        <div class="card-footer" th:if="${fines.totalPages > 1}">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item" th:classappend="${fines.first} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/violations(
+                                status=${param.status},
+                                plateNumber=${param.plateNumber},
+                                startDate=${param.startDate},
+                                endDate=${param.endDate},
+                                page=${fines.number - 1},
+                                sort=${param.sort})}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, fines.totalPages - 1)}"
+                        th:classappend="${i == fines.number} ? 'active' : ''">
+                        <a class="page-link" th:href="@{/violations(
+                                status=${param.status},
+                                plateNumber=${param.plateNumber},
+                                startDate=${param.startDate},
+                                endDate=${param.endDate},
+                                page=${i},
+                                sort=${param.sort})}"
+                           th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${fines.last} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/violations(
+                                status=${param.status},
+                                plateNumber=${param.plateNumber},
+                                startDate=${param.startDate},
+                                endDate=${param.endDate},
+                                page=${fines.number + 1},
+                                sort=${param.sort})}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+<!-- Модальное окно штрафа -->
+<div class="modal fade" id="fineModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">Постановление о нарушении ПДД</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body official-document">
+                <div class="text-center mb-3">
+                    <img src="/images/gibdd-logo.png" alt="ГИБДД" style="height: 50px;">
+                </div>
+
+                <div class="document-header">
+                    <div class="float-end text-muted small">№ <span id="fineNumber"></span></div>
+                    <h4 class="text-center">ПОСТАНОВЛЕНИЕ</h4>
+                    <p class="text-center">об административном правонарушении</p>
+                </div>
+
+                <div class="document-section">
+                    <h6>Данные о нарушении:</h6>
+                    <table class="table table-sm table-borderless">
+                        <tr>
+                            <td width="30%">Дата/время:</td>
+                            <td id="violationDate"></td>
+                        </tr>
+                        <tr>
+                            <td>Место:</td>
+                            <td id="violationLocation"></td>
+                        </tr>
+                        <tr>
+                            <td>Камера:</td>
+                            <td id="cameraInfo"></td>
+                        </tr>
+                        <tr>
+                            <td>Скорость:</td>
+                            <td id="speedInfo"></td>
+                        </tr>
+                        <tr>
+                            <td>Статья КоАП:</td>
+                            <td id="lawArticle"></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="document-section">
+                    <h6>Данные ТС:</h6>
+                    <table class="table table-sm table-borderless">
+                        <tr>
+                            <td width="30%">Марка/модель:</td>
+                            <td id="vehicleModel"></td>
+                        </tr>
+                        <tr>
+                            <td>Гос. номер:</td>
+                            <td id="vehiclePlate"></td>
+                        </tr>
+                        <tr>
+                            <td>Цвет:</td>
+                            <td id="vehicleColor"></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="document-section">
+                    <h6>Финансовые реквизиты:</h6>
+                    <table class="table table-sm table-borderless">
+                        <tr>
+                            <td width="30%">Сумма штрафа:</td>
+                            <td class="fw-bold" id="fineAmount"></td>
+                        </tr>
+                        <tr>
+                            <td>УИН:</td>
+                            <td id="fineUin"></td>
+                        </tr>
+                        <tr>
+                            <td>Срок оплаты:</td>
+                            <td id="paymentDeadline"></td>
+                        </tr>
+                    </table>
+
+                    <div class="alert alert-warning mt-3">
+                        <i class="bi bi-exclamation-triangle"></i> Штраф необходимо оплатить в течение 60 дней с даты вынесения постановления
+                    </div>
+                </div>
+
+                <div class="document-footer mt-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="signature-block">
+                                <div class="mb-3">Инспектор ДПС</div>
+                                <div class="signature-line"></div>
+                                <div class="text-muted small">(подпись)</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <div class="stamp-placeholder">
+                                <div class="stamp-circle">М.П.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <button class="btn btn-primary me-2" id="downloadPdfBtn">
+                        <i class="bi bi-file-earmark-pdf"></i> Скачать PDF
+                    </button>
+                    <button class="btn btn-success" id="payOnlineBtn">
+                        <i class="bi bi-credit-card"></i> Оплатить онлайн
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    function sortBy(field) {
+        const url = new URL(window.location.href);
+        const currentSort = url.searchParams.get('sort') || 'violationTime,desc';
+        const [currentField, currentOrder] = currentSort.split(',');
+
+        const newOrder = (field === currentField && currentOrder === 'asc') ? 'desc' : 'asc';
+        url.searchParams.set('sort', `${field},${newOrder}`);
+
+        window.location.href = url.toString();
+    }
+</script>
+<script th:inline="javascript">
+    $(document).ready(function() {
+        $('#fineModal').on('show.bs.modal', function(event) {
+            const button = $(event.relatedTarget);
+            const fineId = button.data('fine-id');
+
+            $.get('/api/fines/' + fineId, function(data) {
+                // Данные водителя
+                $('#driverName').text(data.driver.fullName);
+                $('#driverAddress').text(data.driver.address);
+                $('#driverLicense').text(data.driver.licenseNumber);
+
+                // Данные нарушения
+                $('#fineNumber').text(data.id);
+                $('#fineNumber2').text(data.id);
+                $('#violationDate').text(new Date(data.violationTime).toLocaleString('ru-RU'));
+                $('#violationLocation').text(data.cameraReport.location);
+                $('#regionName').text(getRegionName(data.cameraReport.location));
+
+                // Реквизиты
+                $('#fineAmount').text(data.fineAmount.toLocaleString('ru-RU') + ' руб.');
+                $('#fineUin').text(data.uin);
+                $('#paymentDeadline').text(new Date(new Date(data.violationTime).setDate(new Date(data.violationTime).getDate() + 60)).toLocaleDateString('ru-RU'));
+
+                // Настройка кнопок
+                $('#downloadPdfBtn').attr('onclick', 'window.location.href=\'/fines/' + fineId + '/pdf\'');
+                $('#payOnlineBtn').attr('href', 'https://www.gosuslugi.ru/pay/' + data.uin);
+
+                // QR-код
+                $('#paymentQr').attr('src',
+                    'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' +
+                    encodeURIComponent('https://www.gosuslugi.ru/pay/' + data.uin));
+            }).fail(function() {
+                alert('Ошибка при загрузке данных штрафа');
+            });
+        });
+
+        function getRegionName(location) {
+            if (location.includes('Москва')) return 'г. Москве';
+            if (location.includes('Санкт-Петербург')) return 'г. Санкт-Петербургу';
+            return location.split(' ')[0] + ' области';
+        }
+    });
+</script>
+</script>
+</body>
+</html>

@@ -275,7 +275,10 @@
           <a class="nav-link" href="/analytics"><i class="bi bi-graph-up"></i> Аналитика</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/about"><i class="bi bi-info-circle"></i> Список нарушений </a>
+          <a class="nav-link" href="/about"><i class="bi bi-info-circle"></i> Отчеты о нарушениях  </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/violations"><i class="bi bi-speedometer"></i> Штрафы </a>
         </li>
         <div class="d-flex align-items-center">
           <div class="d-flex align-items-center">
@@ -319,7 +322,7 @@
             </li>
             <li class="nav-item">
               <a class="nav-link" href="/alerts">
-                <i class="bi bi-megaphone"></i> Ориентировки
+                <i class="bi bi-camera"></i> Штрафы
               </a>
             </li>
             <li class="nav-item">
@@ -331,22 +334,22 @@
 
           <hr class="sidebar-divider">
 
-          <h6 class="sidebar-title">
-            <i class="bi bi-clock-history"></i> Последние действия
-          </h6>
-          <div class="activity-feed">
-            <div th:each="activity : ${recentActivities}" class="activity-item">
-              <div class="activity-icon" th:classappend="${activity.type}">
-                <i th:if="${activity.type == 'VIOLATION'}" class="bi bi-camera-fill"></i>
-                <i th:if="${activity.type == 'APPEAL'}" class="bi bi-chat-left-text"></i>
-                <i th:if="${activity.type == 'ALERT'}" class="bi bi-megaphone"></i>
-              </div>
-              <div class="activity-content">
-                <div th:text="${activity.description}"></div>
-                <small class="text-muted" th:text="${#temporals.format(activity.timestamp, 'dd.MM.yyyy HH:mm')}"></small>
-              </div>
-            </div>
-          </div>
+<!--          <h6 class="sidebar-title">-->
+<!--            <i class="bi bi-clock-history"></i> Последние действия-->
+<!--          </h6>-->
+<!--          <div class="activity-feed">-->
+<!--            <div th:each="activity : ${recentActivities}" class="activity-item">-->
+<!--              <div class="activity-icon" th:classappend="${activity.type}">-->
+<!--                <i th:if="${activity.type == 'VIOLATION'}" class="bi bi-camera-fill"></i>-->
+<!--                <i th:if="${activity.type == 'APPEAL'}" class="bi bi-chat-left-text"></i>-->
+<!--                <i th:if="${activity.type == 'ALERT'}" class="bi bi-megaphone"></i>-->
+<!--              </div>-->
+<!--              <div class="activity-content">-->
+<!--                <div th:text="${activity.description}"></div>-->
+<!--                <small class="text-muted" th:text="${#temporals.format(activity.timestamp, 'dd.MM.yyyy HH:mm')}"></small>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
         </div>
       </div>
     </div>
@@ -384,7 +387,7 @@
       <!-- Герой-секция -->
       <section class="hero-section">
         <div class="container text-center">
-          <h1 class="display-4 fw-bold mb-4">Система автоматизированной учета нарушений ПДД</h1>
+          <h1 class="display-4 fw-bold mb-4">Система учета нарушений ПДД</h1>
           <p class="lead mb-5">Современная платформа для выявления, обработки и анализа дорожных нарушений</p>
           <div class="d-flex justify-content-center gap-3">
             <a href="/violations" class="btn btn-light btn-lg">
@@ -405,10 +408,10 @@
             <div class="card feature-card">
               <div class="card-body text-center">
                 <div class="feature-icon">
-                  <i class="bi bi-plus-circle feature-icon"></i>
+                  <i class="bi bi-speedometer2 feature-icon"></i>
                 </div>
-                <h3>Новое нарушение</h3>
-                <p>Зафиксировать нарушение вручную</p>
+                <h3>Штрафы</h3>
+                <p>Посмотреть информацию о штрафах </p>
                 <a href="/cameras" class="btn btn-primary">Перейти</a>
               </div>
             </div>
@@ -417,7 +420,7 @@
             <div class="card feature-card">
               <div class="card-body text-center">
                 <div class="feature-icon">
-                  <i class="bi bi-speedometer2"></i>
+                  <i class="bi bi-camera"></i>
                 </div>
                 <h3>Нарушения</h3>
                 <p>Просмотр и обработка зафиксированных нарушений ПДД</p>
@@ -432,7 +435,7 @@
                   <i class="bi bi-graph-up"></i>
                 </div>
                 <h3>Аналитика</h3>
-                <p>Статистика и аналитические отчеты по нарушениям</p>
+                <p>Статистика и аналитические данные по нарушениям</p>
                 <a href="/analytics" class="btn btn-primary">Перейти</a>
               </div>
             </div>

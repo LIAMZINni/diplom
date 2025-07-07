@@ -12,7 +12,7 @@ import java.time.format.DateTimeFormatter;
 @Entity
 @Getter
 @Setter
-//@NoArgsConstructor(access = AccessLevel.PROTECTED)
+
 @AllArgsConstructor
 @Builder
 public class CameraReport {
@@ -33,10 +33,10 @@ public class CameraReport {
     private String lane;// "крайняя левая полоса"
 
     @Lob
-    @Column(columnDefinition = "LONGBLOB", nullable = false)
+    @Column(columnDefinition = "LONGBLOB")
     private byte[] imageData;
 
-    @Column(nullable = false, length = 100)
+    @Column( length = 100)
     private String imageMimeType; // "image/jpeg"
 
     @Column(length = 255)

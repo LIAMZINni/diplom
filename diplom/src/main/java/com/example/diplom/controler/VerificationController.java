@@ -1,11 +1,12 @@
 package com.example.diplom.controler;
 
 import com.example.diplom.Vehicle.VehicleWantedInfo;
+import com.example.diplom.Violations.Violation;
 import com.example.diplom.model.*;
 import com.example.diplom.repository.CameraReportRepository;
 import com.example.diplom.repository.CameraRepository;
 import com.example.diplom.repository.InspectorRepository;
-import com.example.diplom.repository.ViolationRepository;
+import com.example.diplom.Violations.ViolationRepository;
 import com.example.diplom.service.CameraReportService;
 import com.example.diplom.service.VehicleInfoService;
 import com.example.diplom.service.ViolationService;
@@ -13,9 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 
 import org.springframework.data.crossstore.ChangeSetPersister;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +24,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 import java.security.Principal;
-import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -95,7 +92,7 @@ public class VerificationController {
         } else {
             redirectAttributes.addFlashAttribute("message",
                     "Нарушение #" +violation.getId()+"" + " подтверждено. Неподтвержденных нарушений нет.");
-            return "redirect:/dashboard";
+            return "violations";
         }
     }
 

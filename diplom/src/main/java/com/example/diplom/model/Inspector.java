@@ -1,5 +1,6 @@
 package com.example.diplom.model;
 
+import com.example.diplom.Violations.Violation;
 import jakarta.persistence.*;
 import lombok.Data;
 

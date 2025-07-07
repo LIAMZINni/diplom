@@ -2,16 +2,23 @@ package com.example.diplom.service;
 
 
 import com.example.diplom.Vehicle.repository.VehicleInfoRepository;
+import com.example.diplom.Violations.PdfGenerator;
+import com.example.diplom.Violations.Violation;
+import com.example.diplom.Violations.ViolationStatus;
 import com.example.diplom.model.*;
 
 
 import com.example.diplom.repository.CameraReportRepository;
 import com.example.diplom.repository.InspectorRepository;
-import com.example.diplom.repository.ViolationRepository;
+import com.example.diplom.Violations.ViolationRepository;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -21,8 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -45,10 +52,11 @@ public class ViolationService {
     private VehicleInfoRepository vehicleRepository;
     @Autowired
     CameraReportRepository cameraReportRepository;
-
+    @Autowired
+    PdfGenerator pdfGenerator;
 
     @Transactional
-    public Violation createFromCameraReport(CameraReport report,String comment,String decision) {
+    public Violation createFromCameraReport(CameraReport report, String comment, String decision) {
         Violation violation = new Violation();
         violation.setViolationTime(report.getTimestamp());
         violation.setType(report.getViolationType());
@@ -69,13 +77,12 @@ public class ViolationService {
                 .ifPresent(violation::setVehicle);
         System.out.printf(decision);
 
-        // Рассчитываем штраф
-//        violation.setFineAmount(fineCalculationService.calculateFine(report));
+
         switch (decision) {
             case "CONFIRM":
                 report.setStatus(CameraReportStatus.VERIFIED);
                 violation.setStatus(ViolationStatus.CONFIRMED);
-                System.out.println("21111111111111111111111111");
+
 
 
 
@@ -85,13 +92,13 @@ public class ViolationService {
 
             case "REJECT":
                 report.setStatus(CameraReportStatus.NO_VIOLATION);
-                violation.setStatus(ViolationStatus.REJECTED);
+//                violation.setStatus(ViolationStatus.REJECTED);
 
                 break;
 
             case "ESCALATE":
                 report.setStatus(CameraReportStatus.NEEDS_REVIEW);
-                violation.setStatus(ViolationStatus.NEEDS_REVIEW);
+//                violation.setStatus(ViolationStatus.NEEDS_REVIEW);
                 break;
         }
         // Сохраняем нарушение
@@ -105,11 +112,53 @@ public class ViolationService {
 
         return savedViolation;
     }
+    public Page<Violation> getFines(
+            ViolationStatus status,
+            String plateNumber,
+            LocalDate startDate,
+            LocalDate endDate,
+            int page,
+            String sort) {
+
+        Specification<Violation> spec = Specification.where(null);
+
+        if (status != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+        }
+
+        if (plateNumber != null && !plateNumber.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.upper(root.get("vehicle").get("plateNumber")),
+                            "%" + plateNumber.toUpperCase() + "%"));
+        }
+
+        if (startDate != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.greaterThanOrEqualTo(root.get("violationTime"), startDate.atStartOfDay()));
+        }
+
+        if (endDate != null) {
+            spec = spec.and((root, query, cb) ->
+                    cb.lessThanOrEqualTo(root.get("violationTime"), endDate.atTime(23, 59, 59)));
+        }
+
+        String[] sortParams = sort.split(",");
+        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(
+                page,
+                20,
+                Sort.by(direction, sortParams[0]));
+
+        return violationRepository.findAll(spec, pageable);
+    }
     public Map<String, Long> getViolationsByType() {
         return violationRepository.countByType()
                 .stream()
                 .collect(Collectors.toMap(
-                        tuple -> ((ViolationType) tuple[0]).name(),
+                        tuple -> ((ViolationType) tuple[0]).getDisplayName(),
                         tuple -> (Long) tuple[1]
                 ));
     }
@@ -130,13 +179,7 @@ public class ViolationService {
                 PageRequest.of(0, 1));
         return reports.isEmpty() ? Optional.empty() : Optional.of(reports.get(0));
     }
-//    public long getTodayViolationsCount() {
-//        LocalDate today = LocalDate.now();
-//        return violationRepository.countByViolationTimeBetween(
-//                today.atStartOfDay(),
-//                today.atTime(LocalTime.MAX)
-//        );
-//    }
+
 
     public long getPendingVerificationsCount() {
         return cameraReportRepository.countByStatusIn(
@@ -147,18 +190,21 @@ public class ViolationService {
                 )
         );
     }
+    public byte[] generatePrescriptionPdf(Long violationId) throws Exception {
+        Violation violation = violationRepository.findById(violationId)
+                .orElseThrow(() -> new Exception("Violation not found"));
 
-//    public long getSolvedCasesCount(int days) {
-//        LocalDateTime from = LocalDateTime.now().minusDays(days);
-//        return violationRepository.countByStatusInAndDecisionTimeBetween(
-//                Arrays.asList(
-//                        ViolationStatus.CONFIRMED,
-//                        ViolationStatus.REJECTED
-//                ),
-//                from,
-//                LocalDateTime.now()
-//        );
-//    }
+        if (violation.getPrescriptionPdf() == null) {
+            violation.setPrescriptionPdf(pdfGenerator.generatePrescription(violation));
+            violationRepository.save(violation);
+        }
+
+        return violation.getPrescriptionPdf();
+    }
+
+
+
+
 
     public List<Violation> findRecentViolations(int limit) {
         return violationRepository.findTop5ByOrderByViolationTimeDesc(
@@ -237,5 +283,9 @@ public class ViolationService {
     }
     public List<Map<String, Object>> getHotSpots() {
         return violationRepository.findHotSpots(10); // Топ-10 точек
+    }
+
+    public Optional<Violation> getById(Long id) {
+       return violationRepository.findById(id);
     }
 }

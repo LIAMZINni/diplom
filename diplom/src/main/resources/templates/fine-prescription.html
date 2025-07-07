@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Постановление №<span th:text="${fine.id}"></span></title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .title {
+            font-weight: bold;
+            font-size: 14pt;
+            text-transform: uppercase;
+            margin: 5px 0;
+        }
+        .document-info {
+            text-align: right;
+            font-size: 10pt;
+            margin: 5px 0;
+        }
+        .section {
+            margin-bottom: 10px;
+        }
+        .section-title {
+            font-weight: bold;
+            border-bottom: 1px solid #000;
+            padding-bottom: 2px;
+            margin-bottom: 5px;
+        }
+        .signature-block {
+            margin-top: 30px;
+        }
+        .stamp {
+            float: right;
+            width: 100px;
+            height: 100px;
+            border: 2px solid red;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 100px;
+            font-weight: bold;
+            margin-top: -20px;
+        }
+        .photo-container {
+            border: 1px solid #ddd;
+            padding: 5px;
+            margin: 5px 0;
+            text-align: center;
+        }
+        .photo-label {
+            font-size: 10pt;
+            text-align: center;
+            margin-top: 3px;
+        }
+        .requisites {
+            background-color: #f8f9fa;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            margin: 5px 0;
+        }
+        .two-columns {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+        .column {
+            width: 48%;
+        }
+        .data-block {
+            border: 1px solid #ddd;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 3px;
+        }
+        .data-block-title {
+            font-weight: bold;
+            margin-bottom: 3px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 2px;
+        }
+        .small {
+            font-size: 10pt;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        table tr td {
+            padding: 3px 0;
+            vertical-align: top;
+        }
+        .qr-container {
+            text-align: center;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<!-- Шапка документа -->
+<div class="header">
+    <img th:src="${logo}" style="height: 50px;">
+    <div class="title">МВД России<br>ГУОБДД</div>
+    <div class="document-info">
+        № <span th:text="${fine.id}"></span> от
+        <span th:text="${#temporals.format(currentDate, 'dd.MM.yyyy')}"></span>
+    </div>
+</div>
+
+<!-- Основной контент в двух колонках -->
+<div class="two-columns">
+    <!-- Левая колонка -->
+    <div class="column">
+        <!-- Данные о нарушителе -->
+        <div class="data-block">
+            <div class="data-block-title">1. Данные о нарушителе</div>
+            <table>
+                <tr>
+                    <td width="40%">ФИО:</td>
+                    <td><strong th:text="${driver.fullName ?: 'Не указан'}"></strong></td>
+                </tr>
+                <tr>
+                    <td>Адрес:</td>
+                    <td th:text="${driver.address?: 'Не указан'}"></td>
+                </tr>
+                <tr>
+                    <td>Водительское удостоверение:</td>
+                    <td th:text="${driver.licenseNumber?: 'Не указан'}"></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Данные о транспортном средстве -->
+        <div class="data-block">
+            <div class="data-block-title">2. Данные транспортного средства</div>
+            <table>
+                <tr>
+                    <td width="40%">Марка/модель:</td>
+                    <td th:text="${fine.vehicle.make?: 'Не указан'} + ' ' + ${fine.vehicle.model?: 'Не указан'}"></td>
+                </tr>
+                <tr>
+                    <td>Гос. номер:</td>
+                    <td th:text="${fine.vehicle.plateNumber?: 'Не указан'}"></td>
+                </tr>
+                <tr>
+                    <td>VIN:</td>
+                    <td th:text="${fine.vehicle.vin?: 'Не указан'}"></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Фото нарушения -->
+        <div class="data-block">
+            <div class="data-block-title">Фотофиксация нарушения</div>
+            <div class="photo-container">
+                <img th:src="@{http://localhost:8080/{id}/image(id=${fine.cameraReport.cameraReportId})}" style="max-width: 100%; max-height: 450px;">
+                <div class="photo-label">Фото нарушения</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Правая колонка -->
+    <div class="column">
+        <!-- Данные о нарушении -->
+        <div class="data-block">
+            <div class="data-block-title">3. Данные о нарушении</div>
+            <table>
+                <tr>
+                    <td width="40%">Дата/время:</td>
+                    <td th:text="${#temporals.format(fine.violationTime, 'dd.MM.yyyy HH:mm')?: 'Не указан'}"></td>
+                </tr>
+                <tr>
+                    <td>Место нарушения:</td>
+                    <td th:text="${fine.cameraReport.location?: 'Не указан'}"></td>
+                </tr>
+                <tr>
+                    <td>Статья КоАП РФ:</td>
+                    <td th:text="${fine.type.article?: 'Не указан'}"></td>
+                </tr>
+                <tr>
+                    <td>Нарушение:</td>
+                    <td th:text="${fine.type.displayName?: 'Не указан'}"></td>
+                </tr>
+                <tr>
+                    <td>Скорость:</td>
+                    <td th:text="${fine.cameraReport.detectedSpeed?: 'Не указан'} + ' км/ч при разрешенных ' + ${fine.cameraReport.speedLimit?: 'Не указан'} + ' км/ч'"></td>
+                </tr>
+                <tr>
+                    <td>Зафиксировано:</td>
+                    <td th:text="${fine.cameraReport.camera.modelName + ' (№' + fine.cameraReport.camera.cameraId + ')'}"></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Реквизиты для оплаты -->
+        <div class="data-block">
+            <div class="data-block-title">4. Реквизиты для оплаты</div>
+            <table>
+                <tr>
+                    <td width="40%">Получатель:</td>
+                    <td>УФК по <span th:text="${fine.inspector.department.name}"></span></td>
+                </tr>
+                <tr>
+                    <td>ИНН/КПП:</td>
+                    <td>7707083893 / 770701001</td>
+                </tr>
+                <tr>
+                    <td>Сумма штрафа:</td>
+                    <td><strong th:text="${fine.fineAmount} + ' руб.'"></strong></td>
+                </tr>
+                <tr>
+                    <td>УИН:</td>
+                    <td>18810000123456789012</td>
+                </tr>
+                <tr>
+                    <td>Срок оплаты:</td>
+                    <td>до <span th:text="${#temporals.format(fine.violationTime.plusDays(60), 'dd.MM.yyyy')}"></span></td>
+                </tr>
+            </table>
+            <div class="qr-container">
+                <img th:src="${qrCode}" style="width: 120px;">
+                <div class="small">Отсканируйте QR-код для оплаты</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Подпись и печать -->
+<div class="signature-block">
+    <div class="stamp">М.П.</div>
+    <div style="margin-top: 20px;">
+        <div>Инспектор ДПС</div>
+        <div style="width: 200px; border-top: 1px solid #000; margin: 3px 0;"></div>
+        <div th:text="${fine.inspector.rang + ' ' + fine.inspector.fullName}"></div>
+        <div class="small">(должность, подпись, ФИО)</div>
+    </div>
+</div>
+
+<!-- Информация об обжаловании -->
+<div style="font-size: 10pt; margin-top: 20px; border-top: 1px solid #eee; padding-top: 5px;">
+    <p><strong>Примечание:</strong> Постановление может быть обжаловано в течение 10 дней с момента получения в районном суде по месту совершения правонарушения.</p>
+    <p>При оплате штрафа в течение 20 дней с даты вынесения постановления предусмотрена скидка 50%.</p>
+    <p>Неуплата административного штрафа в установленный срок влечет наложение дополнительных санкций согласно ст. 20.25 КоАП РФ.</p>
+</div>
+</body>
+</html>

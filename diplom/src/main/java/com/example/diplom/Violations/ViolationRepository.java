@@ -1,14 +1,13 @@
-package com.example.diplom.repository;
+package com.example.diplom.Violations;
 
-import com.example.diplom.model.Violation;
-import com.example.diplom.model.ViolationStatus;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -26,4 +25,6 @@ public interface ViolationRepository extends JpaRepository<Violation,Long> {
             "AVG(v.cameraReport.detectedSpeed) as avgSpeed " +
             "FROM Violation v GROUP BY v.cameraReport.location ORDER BY COUNT(v) DESC LIMIT :limit")
     List<Map<String, Object>> findHotSpots(@Param("limit") int limit);
+
+    Page<Violation> findAll(Specification<Violation> spec, Pageable pageable);
 }

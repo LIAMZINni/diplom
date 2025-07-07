@@ -1,11 +1,12 @@
-package com.example.diplom.model;
+package com.example.diplom.Violations;
 
 public enum ViolationStatus {
-    PENDING("На рассмотрении"),
+
     CONFIRMED("Подтверждено"),
     REJECTED("Отклонено"),
-    NEEDS_REVIEW("На проверке"),
-    PAID("Оплачено");
+    PAID("Оплачено"),
+    PENDING("В процессе"),
+    APPEALED("Обжалаванно ");
 
     private final String description;
 

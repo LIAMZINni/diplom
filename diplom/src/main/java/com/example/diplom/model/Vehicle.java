@@ -1,5 +1,6 @@
 package com.example.diplom.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -31,8 +32,9 @@ public class Vehicle {
 
     @Column(name = "insurance_number",unique = true)
     private String insuranceNumber;
-    @ManyToOne
-    private Driver owner;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "driver_license_number")
+    private Driver driver;
 
 
 }

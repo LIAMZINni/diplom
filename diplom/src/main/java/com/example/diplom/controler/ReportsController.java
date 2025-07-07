@@ -5,6 +5,7 @@ import com.example.diplom.model.CameraReportStatus;
 import com.example.diplom.repository.CameraRepository;
 import com.example.diplom.service.CameraReportService;
 import com.example.diplom.service.VehicleInfoService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
@@ -36,6 +37,7 @@ public class ReportsController {
             @RequestParam(required = false) Long cameraId,
             @RequestParam(required = false) String cameraModel,
             @RequestParam(required = false) String plateNumber,
+            HttpServletRequest request,
             @RequestParam(required = false) CameraReportStatus status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
@@ -43,10 +45,10 @@ public class ReportsController {
             @RequestParam(defaultValue = "timestamp,desc") String[] sort,
             Model model) {
 
-        Pageable pageable = PageRequest.of(page, 10, Sort.by(parseSort(sort).toList()));
+        Pageable pageable = PageRequest.of(page, 20, Sort.by(parseSort(sort).toList()));
         Page<CameraReport> reports = cameraReportService.getFilteredReports(
                 cameraId, cameraModel, plateNumber, status, startDate, endDate, pageable);
-
+        model.addAttribute("request", request);
         model.addAttribute("reports", reports);
         model.addAttribute("statuses", CameraReportStatus.values());
         model.addAttribute("cameras", cameraRepository.findAll()); // Список всех камер для select

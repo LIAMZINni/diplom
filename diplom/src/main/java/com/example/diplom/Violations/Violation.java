@@ -1,8 +1,10 @@
-package com.example.diplom.model;
+package com.example.diplom.Violations;
 
+import com.example.diplom.model.*;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -38,5 +40,20 @@ public class Violation {
     private String comment;
 
     @Enumerated(EnumType.STRING)
-    private ViolationStatus status= ViolationStatus.PENDING;;
+    private ViolationStatus status= ViolationStatus.PENDING;
+    @Lob
+    private byte[] prescriptionPdf;
+
+    private double fineAmount;
+    @PostLoad
+    @PrePersist
+    @PreUpdate
+    public void calculateFine() {
+        if (this.type != null && this.cameraReport != null
+                && this.cameraReport.getDetectedSpeed() != null
+                && this.cameraReport.getSpeedLimit() != null) {
+
+            this.fineAmount = this.type.calculateFine(this);
+        }
+    }
 }
