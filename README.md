@@ -17,11 +17,13 @@
 - Java 17
 - Spring Boot 3.1.5
 - Spring Data JPA
-- Thymeleaf (для генерации PDF)
-- Lombok
+
+**Фронтенд :**
+-Thymeleaf, Bootstrap 5
 
 **База данных:**
 - MySQL 8.0
+
 
 **Инфраструктура:**
 - Maven
