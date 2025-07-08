@@ -15,8 +15,8 @@
 
 **Backend:**
 - Java 17
-- Spring Boot 3.1.5
-- Spring Data JPA
+- Spring Boot 3
+- Hibernate
 
 **Фронтенд :**
 - Thymeleaf, Bootstrap 5
