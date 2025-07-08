@@ -19,7 +19,7 @@
 - Spring Data JPA
 
 **Фронтенд :**
--Thymeleaf, Bootstrap 5
+- Thymeleaf, Bootstrap 5
 
 **База данных:**
 - MySQL 8.0
