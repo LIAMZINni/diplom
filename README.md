@@ -1,3 +1,8 @@
+[![Java](https://img.shields.io/badge/Java-17-blue)](https://www.java.com/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.1.5-green)](https://spring.io/projects/spring-boot)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-purple)](https://www.postgresql.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+
 Дипломный проект - информационная система для  учета и автоматизированной  верификации  административных правонарушений в сфере дорожного движения.
 
 📌 О проекте
@@ -28,3 +33,9 @@
 **Инфраструктура:**
 - Maven
 - Docker (для развертывания)
+
+🖼️ Скриншоты системы
+![image](https://github.com/user-attachments/assets/34209a42-f8d0-4491-a6c7-2931d6cee539)
+Рисунок 1 -Страница проверки нарушений .
+
+
